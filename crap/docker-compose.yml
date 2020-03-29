@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  inbox.filesservice:
+    image: uploadservice
+    build:
+      context: .
+      dockerfile: UploadService/Dockerfile.ci

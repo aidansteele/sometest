@@ -1,0 +1,36 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:2.1.505
+
+# stackit is our helper for deploying cloudformation stacks from ci
+RUN curl -sL -o /usr/bin/stackit https://artifactory.xero-support.com/artifactory/xero_artifacts/stackit/0.0.19/stackit_linux_amd64
+RUN chmod 0755 /usr/bin/stackit
+
+# ecr cred helper means no need to do aws ecr get-login dance
+RUN curl -o /usr/bin/docker-credential-ecr-login -sL https://artifactory.xero-support.com/artifactory/xero_artifacts/amazon-ecr-credential-helper/1.0.0/docker-credential-ecr-login-linux-amd64
+RUN chmod +x /usr/bin/docker-credential-ecr-login
+RUN mkdir -p /home/jenkins/.docker && echo '{"credsStore": "ecr-login"}' >> /home/jenkins/.docker/config.json
+RUN mkdir -p /root/.docker && echo '{"credsStore": "ecr-login"}' >> /root/.docker/config.json
+
+# copied from https://github.com/aspnet/aspnet-docker/blob/fe099fc8ad325ee7381e4a87f044e1c63884f658/1.1/jessie/kitchensink/Dockerfile#L41
+RUN curl -o /tmp/Microsoft.Docker.Sdk.tar.gz https://distaspnet.blob.core.windows.net/sdk/Microsoft.Docker.Sdk.tar.gz \
+    && cd /usr/share/dotnet/sdk/${DOTNET_SDK_VERSION}/Sdks \
+    && tar xf /tmp/Microsoft.Docker.Sdk.tar.gz \
+    && rm /tmp/Microsoft.Docker.Sdk.tar.gz
+
+RUN apt-get update
+RUN apt-get -y install \
+      apt-transport-https \
+      software-properties-common \
+      xsltproc
+
+# install docker - our projects often generate docker images for runtime in stg/prod
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian jessie stable"
+RUN apt-get update
+RUN apt-get -y install docker-ce
+
+RUN apt-get -y install jq
+
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/microsoft.list'
+RUN apt-get update
+RUN apt-get install -y powershell

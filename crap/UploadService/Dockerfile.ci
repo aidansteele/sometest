@@ -1,0 +1,37 @@
+FROM microsoft/dotnet:2.1-sdk AS publish
+WORKDIR /app
+
+# Restore dependencies
+COPY UploadService/NuGet.Config ./UploadService/
+COPY UploadService/UploadService.csproj ./UploadService/
+
+RUN dotnet restore ./UploadService/UploadService.csproj
+
+COPY ./UploadService ./UploadService
+
+# Publish application for release
+RUN dotnet publish ./UploadService -o ./out -c Release
+
+# ==============================================================================
+# Application runtime image
+# ==============================================================================
+FROM microsoft/dotnet:2.1.5-aspnetcore-runtime
+
+LABEL com.xero.portfolio=biz
+LABEL com.xero.product=files
+LABEL com.xero.owner=SimpleBusiness
+LABEL com.xero.subproduct=uploadservice
+
+WORKDIR /app
+
+ENV CORECLR_ENABLE_PROFILING="1" \
+  CORECLR_PROFILER="{36032161-FFC0-4B61-B559-F6C5D41BAE5A}" \
+  CORECLR_NEWRELIC_HOME="/usr/local/newrelic-netcore20-agent" \
+  CORECLR_PROFILER_PATH="/usr/local/newrelic-netcore20-agent/libNewRelicProfiler.so" \
+  NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
+RUN curl -sL https://artifactory.xero-support.com/artifactory/xero_artifacts/install_nr/1.0.0/install_nr.sh | bash
+
+EXPOSE 80
+RUN curl -sL https://artifactory.xero-support.com/xero_artifacts/enteraws/v0.0.22/linux/enteraws -o /usr/bin/enteraws && chmod 0755 /usr/bin/enteraws
+COPY --from=publish /app/UploadService/out ./
+ENTRYPOINT ["enteraws", "dotnet", "UploadService.dll"]

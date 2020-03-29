@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  inbox.filesservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
+    build:
+      context: ./UploadService
+      dockerfile: Dockerfile

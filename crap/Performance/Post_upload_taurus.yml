@@ -1,0 +1,27 @@
+---
+  execution:
+  - scenario: upload_file_org_A
+    concurrency: 150
+    hold-for: 600s
+    ramp-up: 2s
+
+  scenarios:
+    upload_file_org_A:
+      requests:
+      - url: https://uploadservice.sb.xero-test.com/api/v1/files
+        method: POST
+        label: 'POST /files OrgA'
+        body-file: C:\Dev\Performance\Files\files_body_orgA.txt
+        headers:
+          Content-Type: application/json
+          Xero-User-Id: DFBCA82E-8E9E-4877-8879-AD6B60B3DA05
+          Xero-Tenant-Id: 3268D95D-C347-473F-97A0-3AB21A05FC5B
+        think-time: 5s
+  reporting:
+  - blazemeter
+  
+  services:
+  - module: passfail
+    criteria:
+    - avg-rt>500ms for 10s, continue as failed
+    - fail>50% for 10s, stop as failed

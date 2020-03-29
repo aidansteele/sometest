@@ -1,0 +1,26 @@
+replicaCount: 3
+maxUnavailable: 1
+env:
+    - name: Serilog__WriteTo__0__Args__formatter
+      value: Serilog.Formatting.Compact.RenderedCompactJsonFormatter, Serilog.Formatting.Compact
+    - name: ASPNETCORE_ENVIRONMENT
+      value: live
+    - name: DocumentService__Uri
+      value: https://document.service.xero.com
+    - name: XeroDocs__ConnectionString
+      value: "{aws-ssm}FILES_XERODOCS_CONNECTIONSTRING"
+    - name: LaunchDarkly__SdkKey
+      value: "{aws-sm}CFA_UploadService_LD_Sdk_key"
+    - name: NEW_RELIC_APP_NAME
+      value: uploadservice-prod
+    - name: NEW_RELIC_LABELS
+      value: App:uploadservice;Env:uat;Loc:biz
+    - name: NEW_RELIC_LICENSE_KEY
+      value: cc841a139a759c77a0b845c39122badc81969b1e
+ingress:
+    hosts:
+    - uploadservice-k8s.global.xero.com
+podAnnotations:
+  iam.amazonaws.com/role: "arn:aws:iam::966283773129:role/files-k8s-uploadservice-role"
+  cloudwatch.aws.com/include: 'true'
+  sumologic.com/include: 'true'

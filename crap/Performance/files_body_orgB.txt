@@ -1,0 +1,8 @@
+{
+  "FileId": "${__UUID}",
+  "folderId": null,
+  "fileName": "text.txt",
+  "contentType": "text/plain",
+  "contentLength": 19,
+  "fileBytes": [116,104,105,115,32,105,115,32,97,32,116,101,115,116,32,102,105,108,101]
+}

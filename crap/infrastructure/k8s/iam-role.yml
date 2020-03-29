@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  Name:
+    Type: String
+  PStoreKmsKeyArn:
+    Type: String
+Resources:
+    k8sRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: !Ref Name
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/kiam-server"
+                      Action:
+                          - sts:AssumeRole
+            Policies:
+                - PolicyName: AllowGetParam
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - ssm:GetParameters
+                                - ssm:GetParameter
+                            Resource:
+                                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/FILES_XERODOCS_CONNECTIONSTRING
+                            Effect: "Allow"
+                            Action:
+                                - "ssm:GetParameters"
+                                - "ssm:GetParameter"
+                            Resource: "*"
+                - PolicyName: AllowDecryptParam
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Action: kms:Decrypt
+                            Effect: Allow
+                            Resource: !Ref PStoreKmsKeyArn
+                - PolicyName: AllowSecretManagerAccess
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Action: secretsmanager:GetSecretValue
+                            Effect: Allow
+                            Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:CFA_UploadService_LD_Sdk_key-*
+

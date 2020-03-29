@@ -1,0 +1,127 @@
+import groovy.json.JsonSlurper
+
+appName = "uploadservice"
+imageRegistry = "files-docker-common.artifactory.xero-support.com"
+imageRepository = "${imageRegistry}/${appName}"
+imageRepositoryCredentialsId = "4e835dbc-d622-4abd-84bf-12c14d4354d1"
+
+timestamps{
+    color {
+        try{
+            node('master'){
+
+                stage('Check out code from git'){
+                    checkout scm
+                }
+
+                def appImageName = getImageName()
+                def buildEnvironmentImage
+
+                stage('Prepare build environment') {
+                    def buildEnvironmentImageName = UUID.randomUUID().toString()
+
+                    buildEnvironmentImage = docker.build(buildEnvironmentImageName, "-f ci/Jenkinsenv ci")
+                }
+
+                // docker run command
+                buildEnvironmentImage.inside("-u 0 -e aws_container_credentials_relative_uri --privileged -v ${env.WORKSPACE}/.docker:/var/lib/docker")
+                {
+                    stage('Restore'){
+                        sh 'dotnet restore ./UploadService.sln'
+                    }
+
+                    stage('Build'){
+                        sh 'dotnet publish ./UploadService.sln -c Release -o obj/Docker/publish'
+                    }
+
+                    stage('Unit Tests') {
+                        dotnetTest("UploadService.Tests.Unit/UploadService.Tests.Unit.csproj -c Release")
+                    }
+
+                    stage('Build Docker Image') {
+                            sh "docker build -t ${appImageName} -f ./UploadService/Dockerfile.ci ."
+                        }
+
+                    stage('Push image') {
+                        docker.withRegistry("https://${imageRegistry}", imageRepositoryCredentialsId) {
+                            sh "docker push ${appImageName}"
+                        }
+                    }
+                }
+            }
+
+            if(env.BRANCH_NAME == 'master'){
+
+                stage('Deploy to K8S') {
+                    deployToEnvironment("test", "ap-southeast-2-k8s-paas-test-rua", "test.yaml")
+                }
+
+                stage('Acceptance Tests') {
+                        build '../AcceptanceTests/master';
+                }
+
+                slackSend(
+                    color: '#5680ff',
+                    message: "*${env.JOB_NAME}* build ${env.BUILD_NUMBER} Successful\n\nMore details: ${env.BUILD_URL}",
+                    channel: '#files-alerts'
+                )
+
+            }
+
+        }catch (e) {
+            if(env.BRANCH_NAME == 'master') {
+                slackSend(
+                color: 'danger',
+                message: "*${env.JOB_NAME}* build ${env.BUILD_NUMBER} failed\n\nMore details: ${env.BUILD_URL}",
+                channel: '#files-alerts'
+                )
+            }
+
+            error('Build failed: ' + e)
+        }
+    }
+}
+
+def getImageName() {
+  def imageTag = getImageTag()
+  return "${imageRepository}:${imageTag}"
+}
+
+def getImageTag() {
+  return gitCommit()
+}
+
+
+def deployToEnvironment(environmentName, context, varsFileName) {
+  def kubeNamespace = "files"
+
+  def deploymentRole = "XRO-Deployment"
+  def serviceAccount = "640077214053"
+  def serviceRegion = "ap-southeast-2"
+
+  def helmHome = "/tmp/.helm"
+
+  node('master') {
+    checkout scm
+
+    def imageTag = getImageTag()
+
+    awsacct.paastest {
+        stackit("uploadservice-iam", 'infrastructure/k8s/iam-role.yml', [
+                Name: "files-k8s-uploadservice-role",
+                PStoreKmsKeyArn: "arn:aws:kms:ap-southeast-2:333186395126:key/fb958be6-cdd6-4440-b9c5-263fab02391a"
+        ])
+    }
+
+    stage("Deploy to ${environmentName}") {
+      docker.image('luigi.artifactory.xero-support.com/paas-kubernetes/deploy2pk8s:04aaad1badb8e0546ff41a2faa9d8d48ee085754').inside {
+        withAWS(role: deploymentRole, roleAccount: serviceAccount, region: serviceRegion) {
+          sh "helm --home ${helmHome} init --wait --upgrade --kube-context ${context} --tiller-namespace ${kubeNamespace} --service-account tiller"
+          sh "helm --home ${helmHome} upgrade --install --wait ${appName} 'generic-service' --repo https://artifactory.xero-support.com/helm-incubator -f infrastructure/k8s/values.yaml -f infrastructure/k8s/environments/${varsFileName} --set image.repository=${imageRepository} --set image.tag=${imageTag} --kube-context ${context} --namespace ${kubeNamespace} --tiller-namespace ${kubeNamespace}"
+        }
+
+      }
+
+    }
+  }
+}

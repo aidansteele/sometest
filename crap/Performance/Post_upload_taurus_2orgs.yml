@@ -1,0 +1,43 @@
+---
+  execution:
+  - scenario: upload_file_org_A
+    concurrency: 200
+    hold-for: 180s
+    ramp-up: 1s
+  - scenario: upload_file_org_B
+    concurrency: 200
+    hold-for: 180s
+    ramp-up: 1s
+
+  scenarios:
+    upload_file_org_A:
+      requests:
+      - url: https://uploadservice.sb.xero-test.com/api/v1/files
+        method: POST
+        label: 'POST /files OrgA'
+        body-file: C:\Dev\Performance\Files\files_body_orgA.txt
+        headers:
+          Content-Type: application/json
+          Xero-User-Id: DFBCA82E-8E9E-4877-8879-AD6B60B3DA05
+          Xero-Tenant-Id: 3268D95D-C347-473F-97A0-3AB21A05FC5B
+        think-time: 5s
+    upload_file_org_B:
+      requests:
+      - url: https://uploadservice.sb.xero-test.com/api/v1/files
+        method: POST
+        label: 'POST /files OrgB'
+        body-file: C:\Dev\Performance\Files\files_body_orgB.txt
+        headers:
+          Content-Type: application/json
+          Xero-User-Id: d91fbab3-ca78-4598-8d68-d5e077a8c6d3
+          Xero-Tenant-Id: cae19ef1-efc9-4287-a473-914520fc4324
+        think-time: 5s
+  reporting:
+  - blazemeter
+  - console
+  
+  services:
+  - module: passfail
+    criteria:
+    - avg-rt>500ms for 10s, continue as failed
+    - fail>50% for 10s, stop as failed

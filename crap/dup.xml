@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DuplicatesReport ToolsVersion="193.0.20200227.95528">
+  <Statistics>
+    <CodebaseCost>20023</CodebaseCost>
+    <TotalDuplicatesCost>355</TotalDuplicatesCost>
+    <TotalFragmentsCost>803</TotalFragmentsCost>
+  </Statistics>
+  <Duplicates>
+    <Duplicate Cost="93">
+      <Fragment>
+        <FileName>UploadService.Tests.Unit\AssociationMetaDataValidatorTests.cs</FileName>
+        <OffsetRange Start="1091" End="1323"></OffsetRange>
+        <LineRange Start="41" End="43"></LineRange>
+      </Fragment>
+      <Fragment>
+        <FileName>UploadService.Tests.Unit\AssociationMetaDataValidatorTests.cs</FileName>
+        <OffsetRange Start="1765" End="1997"></OffsetRange>
+        <LineRange Start="59" End="61"></LineRange>
+      </Fragment>
+    </Duplicate>
+    <Duplicate Cost="93">
+      <Fragment>
+        <FileName>UploadService.Tests.Unit\AssociationMetaDataValidatorTests.cs</FileName>
+        <OffsetRange Start="2509" End="2740"></OffsetRange>
+        <LineRange Start="79" End="81"></LineRange>
+      </Fragment>
+      <Fragment>
+        <FileName>UploadService.Tests.Unit\AssociationMetaDataValidatorTests.cs</FileName>
+        <OffsetRange Start="3240" End="3471"></OffsetRange>
+        <LineRange Start="99" End="101"></LineRange>
+      </Fragment>
+    </Duplicate>
+    <Duplicate Cost="93">
+      <Fragment>
+        <FileName>UploadService.Tests.Unit\FolderValidatorTests.cs</FileName>
+        <OffsetRange Start="527" End="775"></OffsetRange>
+        <LineRange Start="21" End="23"></LineRange>
+      </Fragment>
+      <Fragment>
+        <FileName>UploadService.Tests.Unit\FolderValidatorTests.cs</FileName>
+        <OffsetRange Start="1230" End="1478"></OffsetRange>
+        <LineRange Start="41" End="43"></LineRange>
+      </Fragment>
+      <Fragment>
+        <FileName>UploadService.Tests.Unit\FolderValidatorTests.cs</FileName>
+        <OffsetRange Start="2349" End="2597"></OffsetRange>
+        <LineRange Start="79" End="81"></LineRange>
+      </Fragment>
+    </Duplicate>
+    <Duplicate Cost="76">
+      <Fragment>
+        <FileName>UploadService.Tests.Unit\DocumentServiceConnectorTests.cs</FileName>
+        <OffsetRange Start="1335" End="1582"></OffsetRange>
+        <LineRange Start="41" End="45"></LineRange>
+      </Fragment>
+      <Fragment>
+        <FileName>UploadService.Tests.Unit\DocumentServiceConnectorTests.cs</FileName>
+        <OffsetRange Start="2209" End="2456"></OffsetRange>
+        <LineRange Start="64" End="68"></LineRange>
+      </Fragment>
+    </Duplicate>
+  </Duplicates>
+</DuplicatesReport>
