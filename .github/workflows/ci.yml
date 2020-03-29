@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: chekcout
+      - name: checkout
         uses: actions/checkout@master
 
       - name: build
@@ -16,5 +16,5 @@ jobs:
       - name: run
         uses: docker://alpine
         with:
-          entrypoint: resharper-actions
+          entrypoint: resharper-action
           args: testdata/inspect.xml
