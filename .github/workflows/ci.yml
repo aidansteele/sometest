@@ -1,0 +1,19 @@
+name: CI
+on:
+  push: {}
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: chekcout
+        uses: actions/checkout@master
+
+      - name: build
+        run: docker build -t alpine .
+
+      - name: run
+        uses: docker://alpine
+        with:
+          entrypoint: [resharper-action, testdata/inspect.xml]
