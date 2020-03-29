@@ -41,7 +41,7 @@
             <Issue TypeId="RedundantUsingDirective" File="crap\UploadService\Connectors\IDocumentServiceConnector.cs" Offset="14-47" Line="2" Message="Using directive is not required by the code and can be safely removed" />
             <Issue TypeId="RedundantUsingDirective" File="crap\UploadService\Connectors\IDocumentServiceConnector.cs" Offset="48-66" Line="3" Message="Using directive is not required by the code and can be safely removed" />
             <Issue TypeId="RedundantUsingDirective" File="crap\UploadService\Connectors\IDocumentServiceConnector.cs" Offset="67-89" Line="4" Message="Using directive is not required by the code and can be safely removed" />
-            <Issue TypeId="UnusedMember.Global" File="crap\UploadService\Connectors\IXeroDbConnector.cs" Offset="238-251" Line="10" Message="Method 'DoesFileExist' is never used" />
+            <Issue TypeId="UnusedMember.Global" File="crap\UploadService\Connectors\IXeroDbConnector.cs" Offset="238-251" Line="10" Message="Method *'DoesFileExist'* is never used" />
             <Issue TypeId="UnusedMember.Global" File="crap\UploadService\Connectors\IXeroDbConnector.cs" Offset="301-311" Line="11" Message="Method 'UpdateFile' is never used" />
             <Issue TypeId="RedundantUsingDirective" File="crap\UploadService\Connectors\XeroDbConnector.cs" Offset="15-33" Line="2" Message="Using directive is not required by the code and can be safely removed" />
             <Issue TypeId="UnusedMember.Global" File="crap\UploadService\Constants\FileEncoding.cs" Offset="113-119" Line="6" Message="Enum member 'Aes256' is never used" />
