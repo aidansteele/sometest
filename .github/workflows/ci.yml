@@ -16,4 +16,5 @@ jobs:
       - name: run
         uses: docker://alpine
         with:
-          entrypoint: [resharper-action, testdata/inspect.xml]
+          entrypoint: sh
+          args: ["-c", "resharper-action testdata/inspect.xml"]
