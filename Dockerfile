@@ -15,7 +15,7 @@ RUN \
   curl -o resharper.tgz -L "https://download.jetbrains.com/resharper/ReSharperUltimate.$RESHARPER_CLI_VERSION/JetBrains.ReSharper.CommandLineTools.Unix.$RESHARPER_CLI_VERSION.tar.gz" \
   && tar -xvf resharper.tgz \
   && rm resharper.tgz \
-  && rm macos-x64
+  && rm -rf macos-x64
 ENV PATH="/resharper:${PATH}"
 
 # this is the same as the base image
