@@ -10,6 +10,7 @@ inputs:
 runs:
   using: docker
   image: docker://alpine
-  entrypoint: resharper-action
   args:
-    - "${SOLUTION}${REPORT}"
+    - sh
+    - -c
+    - "resharper-action ${INPUT_SOLUTION}${INPUT_REPORT}"
