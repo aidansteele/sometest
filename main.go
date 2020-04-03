@@ -2,21 +2,78 @@ package main
 
 import (
 	"encoding/xml"
+	"fmt"
 	"github.com/pkg/errors"
+	"github.com/spf13/pflag"
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
 func main() {
-	report, err := getReport(os.Args[1])
+	noRestorePtr := pflag.Bool("no-restore", false, "")
+	pflag.Parse()
+
+	args := pflag.Args()
+	if len(args) != 1 {
+		usage()
+	}
+
+	path, err := filepath.Abs(args[0])
+	if err != nil {
+		panic(err)
+	}
+
+	ext := filepath.Ext(path)
+
+	if ext == ".sln" {
+		if !*noRestorePtr {
+			dotnetRestore(path)
+		}
+
+		path = generateReport(path)
+		ext = filepath.Ext(path)
+	}
+
+	if ext != ".xml" {
+		usage()
+	}
+
+	report, err := getReport(path)
 	if err != nil {
 		panic(err)
 	}
 
 	printOutput(os.Stdout, *report)
+}
+
+func dotnetRestore(slnPath string) {
+	cmd := exec.Command("dotnet", "restore", slnPath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
+	err := cmd.Run()
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+func generateReport(slnPath string) string {
+	outPath := filepath.Join(os.TempDir(), "report.xml")
+
+	cmd := exec.Command("inspectcode.sh", "--output="+outPath, slnPath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
+	err := cmd.Run()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	return outPath
 }
 
 func getReport(path string) (*Report, error) {
@@ -51,7 +108,7 @@ func printOutput(w io.Writer, report Report) {
 			level := severityToLevel(issueType.Severity)
 			column := strings.Split(issue.Offset, "-")[0]
 			file := strings.ReplaceAll(issue.File, `\`, "/")
-			Message(nil, level, file, issue.Line, column, issue.Message)
+			Message(w, level, file, issue.Line, column, issue.Message)
 		}
 	}
 }
@@ -63,4 +120,19 @@ func severityToLevel(severity string) string {
 	default:
 		return MessageLevelWarning
 	}
+}
+
+func usage() {
+	exe, _ := os.Executable()
+	fmt.Fprintf(os.Stderr, `
+Usage: %s [--no-restore] (solution.sln|results.xml)
+
+There are two modes of operation:
+
+* Pass a path to an .sln file: Runs code inspections and emits output in GitHub format.
+* Pass a path to an .xml file: Converts existing inspection report to GitHub format.
+
+You can optionally specify --no-restore if you want to skip running 'dotnet restore'.
+`, exe)
+	os.Exit(1)
 }
