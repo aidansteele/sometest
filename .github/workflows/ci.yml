@@ -16,8 +16,12 @@ jobs:
       - name: get sample
         run: git clone https://github.com/aidansteele/demo-serverless-aspnetcore.git
 
-      - name: run
-        uses: docker://alpine
+      - name: run it
+        uses: ./
         with:
-          args: HelloWorld.sln
-        #working-directory: demo-serverless-aspnetcore
+          solution: demo-serverless-aspnetcore/HelloWorld.sln
+#      - name: run
+#        uses: docker://alpine
+#        with:
+#          args: HelloWorld.sln
+#        working-directory: demo-serverless-aspnetcore
