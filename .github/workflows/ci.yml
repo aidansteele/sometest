@@ -17,7 +17,7 @@ jobs:
         run: git clone https://github.com/aidansteele/demo-serverless-aspnetcore.git
 
       - name: run
-        working-directory: demo-serverless-aspnetcore
         uses: docker://alpine
         with:
           args: HelloWorld.sln
+        #working-directory: demo-serverless-aspnetcore
